@@ -7,7 +7,7 @@ class Dbus <Formula
 
 # depends_on 'cmake'
   def patches
-    'http://gist.github.com/raw/201422/ed32db785476e7a21bca7dbd17bdbd8e8a482d53/dbus-launchd-integration-1.2.16.patch'
+    'http://gist.github.com/raw/201422/a53c062bc9e1396138de9f0bbddcba31de441d16/dbus-launchd-integration-1.2.16.patch'
   end
 
   def install
@@ -26,16 +26,10 @@ class Dbus <Formula
     inreplace "dbus/dbus-sysdeps-unix.c", "/usr/local", "#{prefix}"
     inreplace "configure", "broken_poll=\"no (cross compiling)\"", "broken_poll=yes"
     # don't want /g, so call it ourselves
-    #safe_system "/usr/bin/perl", "-pi", "-e", "s/<false \\/>/<false \\/>\\n\n\\t<key>Disabled<\\/key>\\n\\t<true\\/>/", "bus/org.freedesktop.dbus-session.plist.in"
-    #safe_system "/usr/bin/perl", "-pi", "-e", "s/<false \\/>/<true \\/>/", "bus/org.freedesktop.dbus-session.plist.in"
     
-#   system "cmake . #{std_cmake_parameters}"
     system "make install"
-      
-    # make the two .plist files
-    #(prefix + "Library" + "LaunchAgents" + "org.freedesktop.dbus-session.plist").write SESSION_PLIST
     
-    
+    (etc + "dbus-1" + "session.d").mkpath
     (prefix + "Library" + "LaunchDaemons" + "org.freedesktop.dbus-system.plist").write <<-EOF
     <?xml version='1.0' encoding='UTF-8'?>
     <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
@@ -64,14 +58,21 @@ class Dbus <Formula
     sudo ln -s #{prefix}/Library/LaunchAgents/org.freedesktop.dbus-session.plist /Library/LaunchAgents/org.freedesktop.dbus-session.plist
     sudo ln -s #{prefix}/Library/LaunchDaemons/org.freedesktop.dbus-system.plist /Library/LaunchDaemons/org.freedesktop.dbus-system.plist
   
-    You will also need to make the two launchd files owned by root, othewise os x will complain:
+    You will also need to make the two launchd files owned by root, otherwise os x will complain:
     sudo chown root:admin #{prefix}/Library/LaunchAgents/org.freedesktop.dbus-session.plist
     sudo chown root:admin #{prefix}/Library/LaunchDaemons/org.freedesktop.dbus-system.plist
   
-    You can manually start the dbus service by doing: 
-      sudo launchctl load /Library/LaunchAgents/org.freedesktop.dbus-session.plist
-    but it will autostart when  needed from the next reboot.
+    Note that you will have to change them back to a user ownership, as well as remove the symlinks
+    when uninstalling, as homebrew won't be able to erase them.
   
+    If you want dbus to auto-start, run the following two commands:
+      sudo launchctl load -w /Library/LaunchDaemons/org.freedesktop.dbus-system.plist
+      launchctl load /Library/LaunchAgents/org.freedesktop.dbus-session.plist
+    then it will autostart when needed from the next reboot.
+  
+    Also, if programs are having trouble connecting to the dbus session, add this to your /etc/profile:
+      export DBUS_SESSION_BUS_ADDRESS="launchd:env=DBUS_LAUNCHD_SESSION_BUS_SOCKET" 
+    
     EOF
   end
 
