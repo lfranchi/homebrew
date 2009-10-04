@@ -5,6 +5,8 @@ class Quassel <Formula
   homepage 'http://www.quassel-irc.org/'
 
   depends_on 'cmake'
+  depends_on 'qt'
+  
   def patches
     DATA
   end
