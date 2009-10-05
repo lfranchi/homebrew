@@ -9,7 +9,11 @@ class Redland <Formula
   depends_on 'rasqal'
 
   def install
-    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking"
+    # fails with llvm :-/
+    ENV.gcc_4_2
+    
+    # fails when including /usr/include/sqlite3.h 
+    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking", "--with-sqlite=no"
     system "make install"
   end
 end
