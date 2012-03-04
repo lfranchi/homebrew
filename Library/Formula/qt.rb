@@ -25,9 +25,12 @@ class Qt < Formula
   depends_on "d-bus" if ARGV.include? '--with-qtdbus'
   depends_on 'sqlite' if MacOS.leopard?
 
-  # Fix compilation with llvm-gcc. Remove for 4.8.1.
   def patches
-    "https://qt.gitorious.org/qt/qt/commit/448ab7cd150ab7bb7d12bcac76bc2ce1c72298bd?format=patch"
+    [
+      # Fix compilation with llvm-gcc. Remove for 4.8.1.
+      "https://qt.gitorious.org/qt/qt/commit/448ab7cd150ab7bb7d12bcac76bc2ce1c72298bd?format=patch",
+      "https://raw.github.com/gist/1966604/d7a50c18803bb414df0ce207557a844d5f2be52e/gistfile1.txt"
+    ]
   end
 
   def install
